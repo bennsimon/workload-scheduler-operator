@@ -11,10 +11,10 @@ The operator introduces 3 custom resources to handle its logic:
 ### Schedule
 
 In this resource one defines a period. It takes in list of `scheduleUnits` which are used to define part(s) of a period. The scheduleUnits are described by the days and start and end time and/or date.
+
 > If the days section in a `scheduleUnit` is not specified or left empty then all the days of the week will take its place. i.e. it will behave like a wildcard.
 
 The name for the schedule i.e. value of `metadata.name` is used in the [WorkloadSchedule](#workloadschedule) CR.
-
 
 > Date format: yyyy-MM-dd e.g. 2023-07-25
 
@@ -130,6 +130,10 @@ To deploy the operator you will need the following manifests:
 *   schedule
 *   workloadschedule
 *   workloadschedulecontroller
+*   crds
+    *   [schedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_schedules.yaml)
+    *   [workloadschedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedules.yaml)
+    *   [workloadschedulecontrollers.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedulecontrollers.yaml)
 
 Below is the snippet of all the yaml files you would need to deploy the operator.
 
@@ -153,11 +157,18 @@ metadata:
   name: workload-scheduler-operator
 rules:
   - apiGroups:
-      - workload-scheduler.bennsimon.github.io/v1
+      - apps
     resources:
-      - Schedule
-      - WorkloadSchedule
-      - WorkloadScheduleController
+      - deployments
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules
     verbs:
       - create
       - delete
@@ -166,6 +177,72 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules/status
+    verbs:
+      - get
+      - patch
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -46,6 +46,7 @@ type WorkloadScheduleControllerReconciler struct {
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers/finalizers,verbs=update
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;update;watch
 
 func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	configUtil := config.New()

@@ -159,7 +159,13 @@ rules:
       - WorkloadSchedule
       - WorkloadScheduleController
     verbs:
-      - *
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -213,7 +219,7 @@ spec:
 #              value: "cert-manager"
 #            - name: RECONCILIATION_DURATION
 #              value: "60"
-          image: bennsimon/workload-scheduler-operator:v0.1.0
+          image: bennsimon/workload-scheduler-operator:tag
           name: manager
           securityContext:
             allowPrivilegeEscalation: false

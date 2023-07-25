@@ -56,7 +56,7 @@ func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, re
 	t := time.Now()
 
 	if configUtil.LookUpBooleanEnv(config.Debug) {
-		fmt.Println(fmt.Sprintf("started processing at %s", t))
+		log.Log.Info(fmt.Sprintf("started processing at %s", t))
 	}
 
 	if err != nil {

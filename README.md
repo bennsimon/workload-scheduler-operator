@@ -141,7 +141,7 @@ To deploy the operator you will need the following manifests:
     kubectl apply -k config/crd/
     ````
 
-Below is the snippet of all the yaml files you would need to deploy the operator.
+Below is the snippet of the yaml files you would need to deploy the operator.  (for crds check command above)
 
 ```yaml
 ---

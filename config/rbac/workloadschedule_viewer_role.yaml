@@ -1,0 +1,27 @@
+# permissions for end users to view workloadschedules.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: workloadschedule-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: workload-scheduler-operator
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: workloadschedule-viewer-role
+rules:
+- apiGroups:
+  - workload-scheduler.bennsimon.github.io
+  resources:
+  - workloadschedules
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - workload-scheduler.bennsimon.github.io
+  resources:
+  - workloadschedules/status
+  verbs:
+  - get

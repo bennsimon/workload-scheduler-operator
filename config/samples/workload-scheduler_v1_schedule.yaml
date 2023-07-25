@@ -1,0 +1,22 @@
+apiVersion: workload-scheduler.bennsimon.github.io/v1
+kind: Schedule
+metadata:
+  labels:
+    app.kubernetes.io/name: schedule
+    app.kubernetes.io/instance: schedule-sample
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workload-scheduler-operator
+  name: weekday
+spec:
+  scheduleUnits:
+    - days:
+        - "Monday"
+        - "Tuesday"
+        - "Wednesday"
+        - "Thursday"
+        - "Friday"
+      start:
+        time: "9:00:00"
+      end:
+        time: "11:00:00"

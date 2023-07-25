@@ -1,0 +1,11 @@
+## Append samples of your project ##
+resources:
+- workload-scheduler_v1_workloadschedule.yaml
+- workload-scheduler_v1_schedule.yaml
+- workload-scheduler_v1_workloadschedule-opensrp.yaml
+- workload-scheduler_v1_workloadschedule-opensrp-deployment.yaml
+- workload-scheduler_v1_workloadschedule-opensrp-deployment-opensrp-web.yaml
+- workload-scheduler_v1_workloadschedule-labels-fhir.yaml
+- workload-scheduler_v1_workloadschedulecontroller.yaml
+- workload-scheduler_v1_schedule-holiday.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

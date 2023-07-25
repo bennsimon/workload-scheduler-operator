@@ -1,0 +1,18 @@
+apiVersion: workload-scheduler.bennsimon.github.io/v1
+kind: Schedule
+metadata:
+  labels:
+    app.kubernetes.io/name: schedule
+    app.kubernetes.io/instance: schedule-sample
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workload-scheduler-operator
+  name: holiday
+spec:
+  scheduleUnits:
+    - start:
+        time: "9:00:00"
+        date: "y-01-01"
+      end:
+        time: "20:00:00"
+        date: "y-01-01"

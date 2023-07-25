@@ -116,6 +116,7 @@ spec:
 | `TIMEZONE`                | Specifies the timezone used.                                                                             | `local`       |
 | `NAMESPACES_OFF_LIMITS`   | Specifies lists of namespaces (comma separated) that should be ignored by the operator.                  | `kube-system` |
 | `RECONCILIATION_DURATION` | Specifies the duration in seconds at which cluster workloads are reconciled with the workload schedules. | `60`          |
+| `DEBUG`                   | Shows the additional info logs for debugging purposes.                                                   | `false`       |
 
 ## Deployment
 
@@ -160,6 +161,15 @@ rules:
       - apps
     resources:
       - deployments
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
     verbs:
       - get
       - list

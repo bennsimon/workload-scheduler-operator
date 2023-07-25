@@ -1,0 +1,20 @@
+apiVersion: workload-scheduler.bennsimon.github.io/v1
+kind: WorkloadSchedule
+metadata:
+  labels:
+    app.kubernetes.io/name: workloadschedule
+    app.kubernetes.io/instance: workloadschedule-opensrp-deployment-web
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workload-scheduler-operator
+  name: workloadschedule-opensrp-fhir-labels
+spec:
+  selector:
+    namespaces:
+    names:
+    kinds:
+    labels:
+      app.kubernetes.io/instance: "hapi-fhir"
+  schedules:
+    - schedule: "weekday"
+      desired: 1

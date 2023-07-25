@@ -1,0 +1,20 @@
+apiVersion: workload-scheduler.bennsimon.github.io/v1
+kind: WorkloadSchedule
+metadata:
+  labels:
+    app.kubernetes.io/name: workloadschedule
+    app.kubernetes.io/instance: workloadschedule-opensrp-deployment
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workload-scheduler-operator
+  name: workloadschedule-opensrp-deployment
+spec:
+  selector:
+    namespaces:
+      - "opensrp"
+    names:
+    kinds:
+      - "deployment"
+  schedules:
+    - schedule: "weekday"
+      desired: 1

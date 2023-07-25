@@ -1,0 +1,12 @@
+apiVersion: workload-scheduler.bennsimon.github.io/v1
+kind: WorkloadScheduleController
+metadata:
+  labels:
+    app.kubernetes.io/name: workloadschedulecontroller
+    app.kubernetes.io/instance: workloadschedulecontroller-sample
+    app.kubernetes.io/part-of: workload-scheduler-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workload-scheduler-operator
+  name: workloadschedulecontroller-sample
+spec:
+  # TODO(user): Add fields here

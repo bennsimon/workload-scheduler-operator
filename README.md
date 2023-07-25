@@ -135,6 +135,11 @@ To deploy the operator you will need the following manifests:
     *   [schedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_schedules.yaml)
     *   [workloadschedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedules.yaml)
     *   [workloadschedulecontrollers.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedulecontrollers.yaml)
+    
+    * Use the command below at the root on this repository (i.e. after cloning) to deploy crds:
+    ````
+    kubectl apply -k config/crd/
+    ````
 
 Below is the snippet of all the yaml files you would need to deploy the operator.
 

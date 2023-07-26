@@ -169,18 +169,19 @@ func (d *DeploymentHandler) AdjustReplicas(_workloadSchedule workloadschedulerv1
 		}
 		if _, ok := processedWorkloads[processedWorkloadKey]; !ok {
 			deploymentSpec := deployment.Spec
-			if *deployment.Spec.Replicas != _workloadSchedule.Desired {
+			currentReplicaCount := *deploymentSpec.Replicas
+
+			if currentReplicaCount != _workloadSchedule.Desired {
 				//if d.Config.LookUpBooleanEnv(config.Debug) {
-				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, *deploymentSpec.Replicas, _workloadSchedule.Desired))
+				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
 				//}
 				*deploymentSpec.Replicas = _workloadSchedule.Desired
-
 				err := r.Update(ctx, &deployment)
 				if err != nil {
-					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.DEPLOYMENT, deploymentSpec.Replicas, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
+					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.DEPLOYMENT, currentReplicaCount, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
 				} else {
 					//if d.Config.LookUpBooleanEnv(config.Debug) {
-					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, *deploymentSpec.Replicas, _workloadSchedule.Desired))
+					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
 
 					//}
 				}
@@ -211,18 +212,20 @@ func (w *StatefulSetHandler) AdjustReplicas(_workloadSchedule workloadschedulerv
 			log.Log.Info(fmt.Sprintf("Fetched: %s .... %v", processedWorkloadKey, processedWorkloads))
 		}
 		if _, ok := processedWorkloads[processedWorkloadKey]; !ok {
-			deploymentSpec := statefulSet.Spec
+			statefulSetSpec := statefulSet.Spec
+			currentReplicaCount := *statefulSet.Spec.Replicas
+
 			if *statefulSet.Spec.Replicas != _workloadSchedule.Desired {
 				//if w.Config.LookUpBooleanEnv(config.Debug) {
-				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, *deploymentSpec.Replicas, _workloadSchedule.Desired))
+				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
 				//}
-				*deploymentSpec.Replicas = _workloadSchedule.Desired
+				*statefulSetSpec.Replicas = _workloadSchedule.Desired
 				err := r.Update(ctx, &statefulSet)
 				if err != nil {
-					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.STATEFULSET, deploymentSpec.Replicas, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
+					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.STATEFULSET, currentReplicaCount, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
 				} else {
 					//if w.Config.LookUpBooleanEnv(config.Debug) {
-					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, *deploymentSpec.Replicas, _workloadSchedule.Desired))
+					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
 					//}
 				}
 			} else {
@@ -250,20 +253,7 @@ func (w *WorkloadScheduleHandler) AdjustReplicas(_workloadSchedule workloadsched
 
 func (w *WorkloadScheduleHandler) extractSchedulesOfInstant(_workloadScheduleAndSchedules map[string][]workloadschedulerv1.Schedule, workloadSchedulerMap map[string]workloadschedulerv1.WorkloadSchedule) map[string]map[string][]workloadschedulerv1.WorkloadScheduleData {
 	var specMap = make(map[string]map[string][]workloadschedulerv1.WorkloadScheduleData)
-	now := time.Now()
-	if val, exists := w.Config.LookUpEnv(config.TIMEZONE); exists {
-		if loc, err := time.LoadLocation(val); err == nil {
-			now.In(loc)
-		} else {
-			now.In(time.Local)
-			log.Log.Error(err, fmt.Sprintf("error when loading timezone: %s", val))
-		}
-	} else {
-		now.In(time.Local)
-		if w.Config.LookUpBooleanEnv(config.Debug) {
-			log.Log.Info(fmt.Sprintf("timezone not set. Time now: %s", now))
-		}
-	}
+	now := time.Now().In(w.Config.GetTimeLocationConfig())
 
 	for workloadScheduleName, _schedules := range _workloadScheduleAndSchedules {
 		if _workloadSchedule, ok := workloadSchedulerMap[workloadScheduleName]; ok {

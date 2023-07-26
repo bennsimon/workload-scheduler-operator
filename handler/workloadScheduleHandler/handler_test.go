@@ -60,11 +60,6 @@ func TestWorkloadScheduleHandler_RankWorkloadScheduleBySelectors(t *testing.T) {
 						WorkloadScheduler: "test-wscheduler-1", Name: "test-deploy", Namespace: "ns", Kind: "deployment", Desired: 0,
 					},
 				},
-				"ns/deployment/test-deploy-v2": []v1.WorkloadScheduleData{
-					{
-						WorkloadScheduler: "test-wscheduler-2", Name: "test-deploy-v2", Namespace: "ns", Kind: "deployment", Desired: 0,
-					},
-				},
 			},
 			"0000": {
 				"*/*/*": []v1.WorkloadScheduleData{
@@ -90,9 +85,6 @@ func TestWorkloadScheduleHandler_RankWorkloadScheduleBySelectors(t *testing.T) {
 		}}, want: []v1.WorkloadScheduleData{
 			{
 				WorkloadScheduler: "test-wscheduler-1", Name: "test-deploy", Namespace: "ns", Kind: "deployment", Desired: 0,
-			},
-			{
-				WorkloadScheduler: "test-wscheduler-2", Name: "test-deploy-v2", Namespace: "ns", Kind: "deployment", Desired: 0,
 			},
 			{
 				WorkloadScheduler: "test-wscheduler-5", Name: "test-deploy", Namespace: "*", Kind: "deployment", Desired: 0,

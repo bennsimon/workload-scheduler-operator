@@ -53,8 +53,7 @@ func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, re
 	configUtil := config.New()
 	workloadSchedulers := &workloadschedulerv1.WorkloadScheduleList{}
 	err := r.List(ctx, workloadSchedulers)
-	t := time.Now()
-
+	t := time.Now().In(configUtil.GetTimeLocationConfig())
 	if configUtil.LookUpBooleanEnv(config.Debug) {
 		log.Log.Info(fmt.Sprintf("started processing at %s", t))
 	}
@@ -75,7 +74,7 @@ func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, re
 	}
 
 	if configUtil.LookUpBooleanEnv(config.Debug) {
-		log.Log.Info(fmt.Sprintf("ended processing at %s, duration: %v", time.Now(), time.Since(t).Seconds()))
+		log.Log.Info(fmt.Sprintf("ended processing at %s, duration: %v", time.Now().In(configUtil.GetTimeLocationConfig()), time.Since(t).Seconds()))
 	}
 
 	recon, err := configUtil.LookUpIntEnv(config.ReconciliationDuration)
@@ -88,38 +87,33 @@ func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, re
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *WorkloadScheduleControllerReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &apps.Deployment{}, config.IndexedField, func(rawObj client.Object) []string {
+	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &apps.Deployment{}, config.IndexedField, func(rawObj client.Object) []string {
 		deployment := rawObj.(*apps.Deployment)
 
 		if deployment == nil {
 			return nil
 		}
-		return []string{deployment.Name}
+		return []string{deployment.ObjectMeta.Name}
 	}); err != nil {
 		return err
 	}
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &workloadschedulerv1.Schedule{}, config.IndexedField, func(rawObj client.Object) []string {
-		schedule := rawObj.(*workloadschedulerv1.Schedule)
+	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &apps.StatefulSet{}, config.IndexedField, func(rawObj client.Object) []string {
+		statefulSet := rawObj.(*apps.StatefulSet)
 
-		if schedule == nil {
+		if statefulSet == nil {
 			return nil
 		}
-
-		if schedule.Kind != "Schedule" {
-			return nil
-		}
-
-		return []string{schedule.Name}
+		return []string{statefulSet.ObjectMeta.Name}
 	}); err != nil {
 		return err
 	}
-
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&workloadschedulerv1.WorkloadScheduleController{}, builder.WithPredicates(r.FilterEvents())).
 		Complete(r)
 }
 
 func (r *WorkloadScheduleControllerReconciler) FilterEvents() predicate.Predicate {
+
 	return predicate.Funcs{CreateFunc: func(createEvent event.CreateEvent) bool {
 		return r.reconcileIfInitialController()
 	}, UpdateFunc: func(updateEvent event.UpdateEvent) bool {

@@ -22,7 +22,10 @@ import (
 	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 // WorkloadScheduleReconciler reconciles a WorkloadSchedule object
@@ -52,6 +55,20 @@ func (r *WorkloadScheduleReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 func (r *WorkloadScheduleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&workloadschedulerv1.WorkloadSchedule{}).
+		For(&workloadschedulerv1.WorkloadSchedule{}, builder.WithPredicates(r.FilterEvents())).
 		Complete(r)
+}
+
+func (r *WorkloadScheduleReconciler) FilterEvents() predicate.Predicate {
+
+	return predicate.Funcs{CreateFunc: func(createEvent event.CreateEvent) bool {
+		return true
+	}, UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+		return true
+	}, DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
+		return false
+	}, GenericFunc: func(genericEvent event.GenericEvent) bool {
+		return false
+	},
+	}
 }

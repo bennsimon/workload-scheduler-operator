@@ -27,7 +27,7 @@ func New() *ScheduleHandler {
 
 func (s *ScheduleHandler) ValidateSchedule(schedule *workloadschedulerv1.Schedule) error {
 	if schedule.Spec.ScheduleUnits == nil || len(schedule.Spec.ScheduleUnits) == 0 {
-		return fmt.Errorf("schedules need to be defined")
+		return fmt.Errorf("schedule(s) need to be defined")
 	}
 	return nil
 }

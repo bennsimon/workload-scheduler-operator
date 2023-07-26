@@ -99,7 +99,7 @@ func TestWorkloadScheduleHandler_RankWorkloadScheduleBySelectors(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &WorkloadScheduleHandler{}
+			w := New()
 			got := w.RankWorkloadScheduleBySelectors(tt.args._specMap)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("RankWorkloadScheduleBySelectors() got = %v, want %v", got, tt.want)

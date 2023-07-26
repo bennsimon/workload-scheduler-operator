@@ -35,7 +35,7 @@ func (c *Config) LookUpEnv(env string) (string, bool) {
 }
 
 func (c *Config) GetTimeLocationConfig() *time.Location {
-	if val, exists := c.LookUpEnv(TIMEZONE); exists {
+	if val, exists := c.Provider.LookUpEnv(TIMEZONE); exists {
 		if loc, err := time.LoadLocation(val); err != nil {
 			log.Log.Info(fmt.Sprintf("invalid timezone: %s, defaulted to local time %s", val, time.Local.String()))
 		} else {
@@ -46,7 +46,7 @@ func (c *Config) GetTimeLocationConfig() *time.Location {
 }
 
 func (c *Config) LookUpIntEnv(env string) (int, error) {
-	val, exists := os.LookupEnv(env)
+	val, exists := c.Provider.LookUpEnv(env)
 	if exists {
 		intVal, err := strconv.Atoi(val)
 		if err != nil {
@@ -58,7 +58,7 @@ func (c *Config) LookUpIntEnv(env string) (int, error) {
 }
 
 func (c *Config) LookUpBooleanEnv(env string) bool {
-	val, exists := os.LookupEnv(env)
+	val, exists := c.Provider.LookUpEnv(env)
 	if exists {
 		boolVal, err := strconv.ParseBool(val)
 		if err != nil {

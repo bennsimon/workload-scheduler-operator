@@ -165,7 +165,7 @@ func (d *DeploymentHandler) AdjustReplicas(_workloadSchedule workloadschedulerv1
 	processedWorkloadKey := fmt.Sprintf("%s/%s/%s", deployment.Namespace, util.DEPLOYMENT, deployment.Name)
 	if _, ok := d.Config.GetIgnoredNamespacesMap()[deployment.Namespace]; !ok {
 		if d.Config.LookUpBooleanEnv(config.Debug) {
-			log.Log.Info(fmt.Sprintf("Fetched: %s .... %v", processedWorkloadKey, processedWorkloads))
+			log.Log.Info(fmt.Sprintf("fetched: %s .... %v", processedWorkloadKey, processedWorkloads))
 		}
 		if _, ok := processedWorkloads[processedWorkloadKey]; !ok {
 			deploymentSpec := deployment.Spec
@@ -173,7 +173,7 @@ func (d *DeploymentHandler) AdjustReplicas(_workloadSchedule workloadschedulerv1
 
 			if currentReplicaCount != _workloadSchedule.Desired {
 				//if d.Config.LookUpBooleanEnv(config.Debug) {
-				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
+				log.Log.Info(fmt.Sprintf("%v updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
 				//}
 				*deploymentSpec.Replicas = _workloadSchedule.Desired
 				err := r.Update(ctx, &deployment)
@@ -181,7 +181,7 @@ func (d *DeploymentHandler) AdjustReplicas(_workloadSchedule workloadschedulerv1
 					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.DEPLOYMENT, currentReplicaCount, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
 				} else {
 					//if d.Config.LookUpBooleanEnv(config.Debug) {
-					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
+					log.Log.Info(fmt.Sprintf("%v updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, deployment.Namespace, deployment.Name, currentReplicaCount, _workloadSchedule.Desired))
 
 					//}
 				}
@@ -209,7 +209,7 @@ func (w *StatefulSetHandler) AdjustReplicas(_workloadSchedule workloadschedulerv
 	processedWorkloadKey := fmt.Sprintf("%s/%s/%s", statefulSet.Namespace, util.STATEFULSET, statefulSet.Name)
 	if _, ok := w.Config.GetIgnoredNamespacesMap()[statefulSet.Namespace]; !ok {
 		if w.Config.LookUpBooleanEnv(config.Debug) {
-			log.Log.Info(fmt.Sprintf("Fetched: %s .... %v", processedWorkloadKey, processedWorkloads))
+			log.Log.Info(fmt.Sprintf("fetched: %s .... %v", processedWorkloadKey, processedWorkloads))
 		}
 		if _, ok := processedWorkloads[processedWorkloadKey]; !ok {
 			statefulSetSpec := statefulSet.Spec
@@ -217,7 +217,7 @@ func (w *StatefulSetHandler) AdjustReplicas(_workloadSchedule workloadschedulerv
 
 			if *statefulSet.Spec.Replicas != _workloadSchedule.Desired {
 				//if w.Config.LookUpBooleanEnv(config.Debug) {
-				log.Log.Info(fmt.Sprintf("%v Updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
+				log.Log.Info(fmt.Sprintf("%v updating NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
 				//}
 				*statefulSetSpec.Replicas = _workloadSchedule.Desired
 				err := r.Update(ctx, &statefulSet)
@@ -225,12 +225,12 @@ func (w *StatefulSetHandler) AdjustReplicas(_workloadSchedule workloadschedulerv
 					log.Log.Error(err, fmt.Sprintf("failed to update %s from %d to %d for workloadschedule %s.", util.STATEFULSET, currentReplicaCount, _workloadSchedule.Desired, _workloadSchedule.WorkloadScheduler))
 				} else {
 					//if w.Config.LookUpBooleanEnv(config.Debug) {
-					log.Log.Info(fmt.Sprintf("%v Updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
+					log.Log.Info(fmt.Sprintf("%v updated NS: %v, Name: %v, from %v to %v", _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, currentReplicaCount, _workloadSchedule.Desired))
 					//}
 				}
 			} else {
 				//if w.Config.LookUpBooleanEnv(config.Debug) {
-				log.Log.Info(fmt.Sprintf("Got %s %s in order with %s. Namespace: %s, Name: %s, Desired: %d", statefulSet.Name, util.STATEFULSET, _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, _workloadSchedule.Desired))
+				log.Log.Info(fmt.Sprintf("got %s %s in order with %s. Namespace: %s, Name: %s, Desired: %d", statefulSet.Name, util.STATEFULSET, _workloadSchedule.WorkloadScheduler, statefulSet.Namespace, statefulSet.Name, _workloadSchedule.Desired))
 				//}
 			}
 			processedWorkloads[processedWorkloadKey] = processedWorkloadKey

@@ -305,7 +305,7 @@ spec:
         - command:
             - /manager
           env:
-#            - name: TIMEZONE
+#            - name: TZ
 #              value: "Africa/Nairobi"
 #            - name: NAMESPACES_OFF_LIMITS
 #              value: "cert-manager"

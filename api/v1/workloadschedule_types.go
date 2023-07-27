@@ -59,6 +59,7 @@ type WorkloadScheduleData struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster
 
 // WorkloadSchedule is the Schema for the workloadschedules API
 type WorkloadSchedule struct {

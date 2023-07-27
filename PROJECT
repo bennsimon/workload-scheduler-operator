@@ -10,7 +10,7 @@ repo: bennsimon.github.io/workload-scheduler-operator
 resources:
 - api:
     crdVersion: v1
-    namespaced: true
+    namespaced: false
   controller: true
   domain: bennsimon.github.io
   group: workload-scheduler
@@ -19,7 +19,7 @@ resources:
   version: v1
 - api:
     crdVersion: v1
-    namespaced: true
+    namespaced: false
   controller: true
   domain: bennsimon.github.io
   group: workload-scheduler
@@ -28,7 +28,7 @@ resources:
   version: v1
 - api:
     crdVersion: v1
-    namespaced: true
+    namespaced: false
   controller: true
   domain: bennsimon.github.io
   group: workload-scheduler

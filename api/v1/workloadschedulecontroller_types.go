@@ -40,6 +40,7 @@ type WorkloadScheduleControllerStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster
 
 // WorkloadScheduleController is the Schema for the workloadschedulecontrollers API
 type WorkloadScheduleController struct {

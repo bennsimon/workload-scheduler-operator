@@ -18,14 +18,12 @@ package controller
 
 import (
 	"bennsimon.github.io/workload-scheduler-operator/handler/scheduleHandler"
-	"bennsimon.github.io/workload-scheduler-operator/util/config"
 	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	workloadschedulerv1 "bennsimon.github.io/workload-scheduler-operator/api/v1"
@@ -41,10 +39,9 @@ type ScheduleReconciler struct {
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=schedules,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=schedules/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=schedules/finalizers,verbs=update
+//+kubebuilder:resource:scope=cluster
 
 func (r *ScheduleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
 	schedule := &workloadschedulerv1.Schedule{}
 	err := r.Get(ctx, client.ObjectKey{Name: req.Name, Namespace: req.Namespace}, schedule)
 	if err != nil {
@@ -52,7 +49,6 @@ func (r *ScheduleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	err = r.IScheduleHandler.ValidateSchedule(schedule)
 	if err != nil {
-		logger.Error(err, "error on validation")
 		return ctrl.Result{}, err
 	}
 
@@ -61,16 +57,6 @@ func (r *ScheduleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ScheduleReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(context.TODO(), &workloadschedulerv1.Schedule{}, config.IndexedField, func(rawObj client.Object) []string {
-		schedule := rawObj.(*workloadschedulerv1.Schedule)
-
-		if schedule == nil {
-			return nil
-		}
-		return []string{schedule.ObjectMeta.Name}
-	}); err != nil {
-		return err
-	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&workloadschedulerv1.Schedule{}, builder.WithPredicates(r.FilterEvents())).
 		Complete(r)

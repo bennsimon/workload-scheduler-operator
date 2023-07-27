@@ -2,7 +2,6 @@ package scheduleHandler
 
 import (
 	v1 "bennsimon.github.io/workload-scheduler-operator/api/v1"
-	"bennsimon.github.io/workload-scheduler-operator/util/config"
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/mock"
@@ -40,8 +39,8 @@ type testReader struct {
 	client.Reader
 }
 
-func (t *testReader) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
-	args := t.Called(ctx, list, opts)
+func (t *testReader) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+	args := t.Called(ctx, key, obj, opts)
 	return args.Error(0)
 }
 
@@ -68,7 +67,7 @@ func TestScheduleHandler_getSchedulesByName(t *testing.T) {
 	}{
 		{name: "should return nil when schedule is not found.", setupMocks: func() {
 			testreader = &testReader{}
-			testreader.On("List", nil, mock.IsType(&v1.ScheduleList{}), []client.ListOption{client.MatchingFields{config.IndexedField: "test-schedule"}}).Return(fmt.Errorf("some error"))
+			testreader.On("Get", nil, mock.IsType(client.ObjectKey{Name: "test-schedule"}), mock.IsType(&v1.Schedule{}), []client.GetOption(nil)).Return(fmt.Errorf("some error"))
 		}, verifyMocks: func() {
 			testreader.AssertExpectations(t)
 		}, args: args{schedule: "test-schedule", ctx: nil}, want: nil, wantErr: true},
@@ -85,13 +84,13 @@ func TestScheduleHandler_getSchedulesByName(t *testing.T) {
 			s := &ScheduleHandler{}
 			tt.setupMocks()
 			defer tt.verifyMocks()
-			got, err := s.getSchedulesByName(tt.args.schedule, testreader, tt.args.ctx)
+			got, err := s.getScheduleByName(tt.args.schedule, testreader, tt.args.ctx)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getSchedulesByName() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("getScheduleByName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getSchedulesByName() got = %v, want %v", got, tt.want)
+				t.Errorf("getScheduleByName() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -102,7 +101,7 @@ type testScheduleHandler struct {
 	IScheduleHandler
 }
 
-func (s *testScheduleHandler) getSchedulesByName(schedule string, r client.Reader, ctx context.Context) (*v1.Schedule, error) {
+func (s *testScheduleHandler) getScheduleByName(schedule string, r client.Reader, ctx context.Context) (*v1.Schedule, error) {
 	args := s.Called(schedule, r, ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -129,7 +128,7 @@ func TestScheduleHandler_CheckIfSchedulesExist(t *testing.T) {
 	}{
 		{name: "should return nil schedules when error occurs when getting schedule.", setupMocks: func() {
 			testschedulehandler = &testScheduleHandler{}
-			testschedulehandler.On("getSchedulesByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(nil, fmt.Errorf("some error"))
+			testschedulehandler.On("getScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(nil, fmt.Errorf("some error"))
 			s.IScheduleHandler = testschedulehandler
 		}, verifyMocks: func() {
 			testschedulehandler.AssertExpectations(t)
@@ -142,7 +141,7 @@ func TestScheduleHandler_CheckIfSchedulesExist(t *testing.T) {
 			want: nil, wantErr: true},
 		{name: "should return schedules when schedule retrieved successfully.", setupMocks: func() {
 			testschedulehandler = &testScheduleHandler{}
-			testschedulehandler.On("getSchedulesByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(&v1.Schedule{}, nil)
+			testschedulehandler.On("getScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(&v1.Schedule{}, nil)
 			s.IScheduleHandler = testschedulehandler
 		}, verifyMocks: func() {
 			testschedulehandler.AssertExpectations(t)

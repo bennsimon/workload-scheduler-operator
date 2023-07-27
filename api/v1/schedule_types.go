@@ -50,6 +50,7 @@ type ScheduleStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster
 
 // Schedule is the Schema for the schedules API
 type Schedule struct {

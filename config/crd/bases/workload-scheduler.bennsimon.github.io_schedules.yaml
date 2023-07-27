@@ -12,7 +12,7 @@ spec:
     listKind: ScheduleList
     plural: schedules
     singular: schedule
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1
     schema:

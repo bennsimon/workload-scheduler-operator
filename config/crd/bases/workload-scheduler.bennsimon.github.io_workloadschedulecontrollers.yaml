@@ -35,11 +35,6 @@ spec:
           spec:
             description: WorkloadScheduleControllerSpec defines the desired state
               of WorkloadScheduleController
-            properties:
-              foo:
-                description: Foo is an example field of WorkloadScheduleController.
-                  Edit workloadschedulecontroller_types.go to remove/update
-                type: string
             type: object
           status:
             description: WorkloadScheduleControllerStatus defines the observed state

@@ -16,7 +16,7 @@ This chart bootstraps  [workload-scheduler-operator](https://github.com/bennsimo
 
 ## Prerequisites
 
-- Kubernetes 1.21+
+- Kubernetes 1.16+
 - Helm 3.1.0
 
 ## Installing the Chart

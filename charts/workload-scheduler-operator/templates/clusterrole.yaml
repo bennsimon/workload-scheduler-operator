@@ -1,0 +1,104 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "workload-scheduler-operator.fullname" . }}
+  labels:
+    {{- include "workload-scheduler-operator.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - schedules/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedulecontrollers/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - workload-scheduler.bennsimon.github.io
+    resources:
+      - workloadschedules/status
+    verbs:
+      - get
+      - patch
+      - update

@@ -49,7 +49,7 @@ func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, re
 	return reconcile.Result{}, nil
 }
 
-func (r *WorkloadScheduleControllerReconciler) InitiateSchedule() {
+func (r *WorkloadScheduleControllerReconciler) InitiateSchedule() error {
 	configUtil := config.New()
 
 	s := gocron.NewScheduler(time.Local)
@@ -64,11 +64,11 @@ func (r *WorkloadScheduleControllerReconciler) InitiateSchedule() {
 		}
 	})
 	if err != nil {
-		log.Log.Error(err, "error when scheduling job start not called")
-		return
+		return err
 	}
 
 	s.StartAsync()
+	return nil
 }
 
 func (r *WorkloadScheduleControllerReconciler) RunJob(ctx context.Context) error {
@@ -124,7 +124,5 @@ func (r *WorkloadScheduleControllerReconciler) SetupWithManager(mgr ctrl.Manager
 	}); err != nil {
 		return err
 	}
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&workloadschedulerv1.WorkloadScheduleController{}).
-		Complete(r)
+	return nil
 }

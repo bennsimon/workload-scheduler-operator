@@ -19,8 +19,10 @@ package main
 import (
 	"bennsimon.github.io/workload-scheduler-operator/handler/scheduleHandler"
 	"bennsimon.github.io/workload-scheduler-operator/handler/workloadScheduleHandler"
+	"context"
 	"flag"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -117,7 +119,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "WorkloadScheduleController")
 		os.Exit(1)
 	}
-	workloadScheduleControllerReconciler.InitiateSchedule()
+
+	if err := mgr.Add(manager.RunnableFunc(func(ctx context.Context) error {
+		return workloadScheduleControllerReconciler.InitiateSchedule()
+	})); err != nil {
+		setupLog.Error(err, "unable run InitiateSchedule()")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -134,4 +142,5 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
 }

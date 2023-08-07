@@ -6,7 +6,7 @@ This operator scales various kubernetes workloads to a desired number of replica
 
 ## Description
 
-The operator introduces 3 custom resources to handle its logic:
+The operator introduces 2 custom resources to handle its logic:
 
 ### Schedule
 

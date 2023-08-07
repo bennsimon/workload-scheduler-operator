@@ -60,11 +60,11 @@ func (r *WorkloadScheduleControllerReconciler) InitiateSchedule() {
 	_, err = s.Every(recon).Seconds().Do(func() {
 		err := r.RunJob(context.Background())
 		if err != nil {
-			return
+			log.Log.Error(err, "error occurred when executing RunJob()")
 		}
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Log.Error(err, "error when scheduling job start not called")
 		return
 	}
 

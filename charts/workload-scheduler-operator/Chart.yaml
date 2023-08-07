@@ -21,9 +21,9 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.1.0"
+appVersion: "v0.1.1-beta-r1"
 
 dependencies:
   - name: crds
-    version: "0.1.0"
+    version: "0.1.1"
     condition: crds.enabled

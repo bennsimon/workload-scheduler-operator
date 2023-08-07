@@ -9,7 +9,7 @@ image:
   repository: bennsimon/workload-scheduler-operator
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "main-v6"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

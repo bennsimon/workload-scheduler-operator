@@ -108,14 +108,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.WorkloadScheduleControllerReconciler{
+	workloadScheduleControllerReconciler := &controller.WorkloadScheduleControllerReconciler{
 		Client:                   mgr.GetClient(),
 		Scheme:                   mgr.GetScheme(),
 		IWorkloadScheduleHandler: workloadScheduleHandler.New(),
-	}).SetupWithManager(mgr); err != nil {
+	}
+	if err = (workloadScheduleControllerReconciler).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "WorkloadScheduleController")
 		os.Exit(1)
 	}
+	workloadScheduleControllerReconciler.InitiateSchedule()
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

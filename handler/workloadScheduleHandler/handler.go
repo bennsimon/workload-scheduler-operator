@@ -253,7 +253,7 @@ func (w *WorkloadScheduleHandler) AdjustReplicas(_workloadSchedule workloadsched
 
 func (w *WorkloadScheduleHandler) extractSchedulesOfInstant(_workloadScheduleAndSchedules map[string][]workloadschedulerv1.Schedule, workloadSchedulerMap map[string]workloadschedulerv1.WorkloadSchedule) map[string]map[string][]workloadschedulerv1.WorkloadScheduleData {
 	var specMap = make(map[string]map[string][]workloadschedulerv1.WorkloadScheduleData)
-	now := time.Now().In(w.Config.GetTimeLocationConfig())
+	now := time.Now().In(time.Local)
 
 	for workloadScheduleName, _schedules := range _workloadScheduleAndSchedules {
 		if _workloadSchedule, ok := workloadSchedulerMap[workloadScheduleName]; ok {

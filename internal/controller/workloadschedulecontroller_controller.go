@@ -23,11 +23,10 @@ import (
 	"fmt"
 	apps "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
+	"github.com/go-co-op/gocron"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,46 +42,64 @@ type WorkloadScheduleControllerReconciler struct {
 	workloadScheduleHandler.IWorkloadScheduleHandler
 }
 
-//+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=workload-scheduler.bennsimon.github.io,resources=workloadschedulecontrollers/finalizers,verbs=update
-//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;update;watch
-//+kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;update;watch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;update;watch
+// +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;update;watch
 
-func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *WorkloadScheduleControllerReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+	return reconcile.Result{}, nil
+}
+
+func (r *WorkloadScheduleControllerReconciler) InitiateSchedule() {
+	configUtil := config.New()
+
+	s := gocron.NewScheduler(time.Local)
+	recon, err := configUtil.LookUpIntEnv(config.ReconciliationDuration)
+	if err != nil {
+		recon = 60
+	}
+	_, err = s.Every(recon).Seconds().Do(func() {
+		err := r.RunJob(context.Background())
+		if err != nil {
+			return
+		}
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	s.StartAsync()
+}
+
+func (r *WorkloadScheduleControllerReconciler) RunJob(ctx context.Context) error {
 	configUtil := config.New()
 	workloadSchedulers := &workloadschedulerv1.WorkloadScheduleList{}
 	err := r.List(ctx, workloadSchedulers)
-	t := time.Now().In(configUtil.GetTimeLocationConfig())
+	t := time.Now().In(time.Local)
 	if configUtil.LookUpBooleanEnv(config.Debug) {
 		log.Log.Info(fmt.Sprintf("started processing at %s", t))
 	}
 
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
+			return nil
 		}
-		return ctrl.Result{}, err
+		return err
 	} else {
 		workloadSchedulerAndSchedules, workloadSchedulerMap := r.IWorkloadScheduleHandler.EvaluateWorkloadSchedulers(workloadSchedulers, r, ctx)
 
 		err = r.IWorkloadScheduleHandler.ProcessWorkloadSchedules(workloadSchedulerAndSchedules, workloadSchedulerMap, r.Client, ctx)
 		if err != nil {
 			log.Log.Error(err, "an error occurred on ProcessWorkloadSchedules()")
-			return ctrl.Result{}, err
+			return err
 		}
 	}
 
 	if configUtil.LookUpBooleanEnv(config.Debug) {
-		log.Log.Info(fmt.Sprintf("ended processing at %s, duration: %v", time.Now().In(configUtil.GetTimeLocationConfig()), time.Since(t).Seconds()))
+		log.Log.Info(fmt.Sprintf("ended processing at %s, duration: %v", time.Now().In(time.Local), time.Since(t).Seconds()))
 	}
 
-	recon, err := configUtil.LookUpIntEnv(config.ReconciliationDuration)
-	if err != nil {
-		recon = 60
-	}
-
-	return ctrl.Result{RequeueAfter: time.Duration(recon) * time.Second}, nil
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -108,38 +125,6 @@ func (r *WorkloadScheduleControllerReconciler) SetupWithManager(mgr ctrl.Manager
 		return err
 	}
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&workloadschedulerv1.WorkloadScheduleController{}, builder.WithPredicates(r.FilterEvents())).
+		For(&workloadschedulerv1.WorkloadScheduleController{}).
 		Complete(r)
-}
-
-func (r *WorkloadScheduleControllerReconciler) FilterEvents() predicate.Predicate {
-
-	return predicate.Funcs{CreateFunc: func(createEvent event.CreateEvent) bool {
-		return r.reconcileIfInitialController()
-	}, UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-		return false
-	}, DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-		return false
-	}, GenericFunc: func(genericEvent event.GenericEvent) bool {
-		return false
-	},
-	}
-}
-
-func (r *WorkloadScheduleControllerReconciler) reconcileIfInitialController() bool {
-	workloadScheduleControllerList := workloadschedulerv1.WorkloadScheduleControllerList{}
-	err := r.List(context.Background(), &workloadScheduleControllerList)
-	if err != nil {
-		return false
-	}
-
-	if len(workloadScheduleControllerList.Items) > 1 {
-		err := r.Delete(context.Background(), &workloadScheduleControllerList.Items[len(workloadScheduleControllerList.Items)-1])
-		if err != nil {
-			return false
-		}
-		log.Log.Error(fmt.Errorf("a single WorkloadScheduleController CR is required. Found %d. Additional CRs deleted", len(workloadScheduleControllerList.Items)), "")
-	}
-
-	return true
 }

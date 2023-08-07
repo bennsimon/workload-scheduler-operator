@@ -3,16 +3,13 @@ package config
 import (
 	"fmt"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
 	MapKeySeparator        = "/"
 	IndexedField           = "metadata.name"
-	TIMEZONE               = "TZ"
 	NamespacesOffLimits    = "NAMESPACES_OFF_LIMITS"
 	ReconciliationDuration = "RECONCILIATION_DURATION"
 	Debug                  = "DEBUG"
@@ -32,17 +29,6 @@ func New() *Config {
 
 func (c *Config) LookUpEnv(env string) (string, bool) {
 	return os.LookupEnv(env)
-}
-
-func (c *Config) GetTimeLocationConfig() *time.Location {
-	if val, exists := c.Provider.LookUpEnv(TIMEZONE); exists {
-		if loc, err := time.LoadLocation(val); err != nil {
-			log.Log.Info(fmt.Sprintf("invalid timezone: %s, defaulted to local time %s", val, time.Local.String()))
-		} else {
-			return loc
-		}
-	}
-	return time.Local
 }
 
 func (c *Config) LookUpIntEnv(env string) (int, error) {

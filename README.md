@@ -88,25 +88,6 @@ spec:
       desired: 2
 ```
 
-### WorkloadScheduleController
-
-This CR is used to activate and determine when reconciliation of the workload schedules will happen. A cluster should only have one of this, extras will be deleted automatically.
-Takes the structure below:
-
-```yaml
-apiVersion: workload-scheduler.bennsimon.github.io/v1
-kind: WorkloadScheduleController
-metadata:
- labels:
-   app.kubernetes.io/name: workloadschedulecontroller
-   app.kubernetes.io/instance: workloadschedulecontroller-sample
-   app.kubernetes.io/part-of: workload-scheduler-operator
-   app.kubernetes.io/managed-by: kustomize
-   app.kubernetes.io/created-by: workload-scheduler-operator
- name: workloadschedulecontroller-sample
-spec:
-```
-
 ### Configuration
 
 #### Container Environment Configuration
@@ -130,11 +111,9 @@ To deploy the operator you will need the following manifests:
 *   deployment
 *   schedule
 *   workloadschedule
-*   workloadschedulecontroller
 *   crds
     *   [schedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_schedules.yaml)
     *   [workloadschedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedules.yaml)
-    *   [workloadschedulecontrollers.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedulecontrollers.yaml)
     
     * Use the command below at the root on this repository (i.e. after cloning) to deploy crds:
     ````
@@ -202,32 +181,6 @@ rules:
       - workload-scheduler.bennsimon.github.io
     resources:
       - schedules/status
-    verbs:
-      - get
-      - patch
-      - update
-  - apiGroups:
-      - workload-scheduler.bennsimon.github.io
-    resources:
-      - workloadschedulecontrollers
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - workload-scheduler.bennsimon.github.io
-    resources:
-      - workloadschedulecontrollers/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - workload-scheduler.bennsimon.github.io
-    resources:
-      - workloadschedulecontrollers/status
     verbs:
       - get
       - patch

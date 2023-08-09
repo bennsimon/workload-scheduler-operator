@@ -175,3 +175,35 @@ func TestScheduleHandler_CheckIfSchedulesExist(t *testing.T) {
 		})
 	}
 }
+
+func TestScheduleHandler_ValidateSchedule(t *testing.T) {
+	type fields struct {
+		IScheduleHandler IScheduleHandler
+	}
+	type args struct {
+		schedule *v1.Schedule
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{name: "should return error when ScheduleUnits is nil", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: nil}}}, wantErr: true},
+		{name: "should return error when ScheduleUnits is empty", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: []v1.ScheduleUnit{}}}}, wantErr: true},
+		{name: "should return error when startTime is after EndTime", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: []v1.ScheduleUnit{{Start: v1.TimeUnit{Time: "09:00:00"}, End: v1.TimeUnit{Time: "08:00:00"}}}}}}, wantErr: true},
+		{name: "should return error when startTime is equal to EndTime", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: []v1.ScheduleUnit{{Start: v1.TimeUnit{Time: "08:00:00"}, End: v1.TimeUnit{Time: "08:00:00"}}}}}}, wantErr: true},
+		{name: "should not return error with valid timeUnit", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: []v1.ScheduleUnit{{Start: v1.TimeUnit{Time: "09:00:00"}, Days: []string{"Monday"}, End: v1.TimeUnit{Time: "18:00:00"}}}}}}, wantErr: false},
+		{name: "should return error if day is invalid", fields: fields{IScheduleHandler: New()}, args: args{schedule: &v1.Schedule{Spec: v1.ScheduleSpec{ScheduleUnits: []v1.ScheduleUnit{{Days: []string{"Motday"}, Start: v1.TimeUnit{Time: "09:00:00"}, End: v1.TimeUnit{Time: "18:00:00"}}}}}}, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &ScheduleHandler{
+				IScheduleHandler: tt.fields.IScheduleHandler,
+			}
+			if err := s.ValidateSchedule(tt.args.schedule); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateSchedule() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

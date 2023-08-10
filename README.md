@@ -55,6 +55,7 @@ spec:
 
 This is the resource where one specifies the workload(s) and schedule(s) with which action to perform on a particular schedule. It takes in selectors and schedules; currently the supported selectors are `namespace`, `name`, `kind` and `labels`. The schedules section is used to specify the list of schedules with the desired (replica count) value of that particular period.
 The order of definition in the schedules section determines which schedule has more priority (FIFO).
+The more specific a workload schedule is, the higher priority it has i.e. it will override a more general selector.
 
 The custom resource takes the form below:
 

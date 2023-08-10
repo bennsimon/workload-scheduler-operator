@@ -31,12 +31,12 @@ func (s *ScheduleHandler) ValidateSchedule(schedule *workloadschedulerv1.Schedul
 		return fmt.Errorf("schedule(s) need to be defined")
 	} else {
 		now := time.Now().In(time.Local)
-		longDayNames := []string{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
+		days := []string{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
 
 		for _, scheduleUnit := range schedule.Spec.ScheduleUnits {
 			if scheduleUnit.Days != nil && len(scheduleUnit.Days) > 0 {
 				for _, day := range scheduleUnit.Days {
-					if !slices.Contains(longDayNames, strings.ToLower(day)) {
+					if !slices.Contains(days, strings.ToLower(day)) {
 						return fmt.Errorf("day: %s, is not valid", day)
 					}
 				}
@@ -50,8 +50,11 @@ func (s *ScheduleHandler) ValidateSchedule(schedule *workloadschedulerv1.Schedul
 				return err
 			}
 
-			if startTime.After(endTime) || startTime.Equal(endTime) {
-				return fmt.Errorf("invalid timeunit; startTime: %s, endTime: %s", startTime, endTime)
+			if startTime.After(endTime) {
+				return fmt.Errorf("invalid timeunit, %s; startTime: %s, endTime: %s", "endTime is before startTime", startTime, endTime)
+			}
+			if startTime.Equal(endTime) {
+				return fmt.Errorf("invalid timeunit, %s; startTime: %s, endTime: %s", "endTime == startTime", startTime, endTime)
 			}
 		}
 	}

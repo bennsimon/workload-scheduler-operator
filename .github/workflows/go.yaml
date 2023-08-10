@@ -5,8 +5,24 @@ name: Go
 
 on:
   push:
+    paths:
+      - "api/**"
+      - "cmd/**"
+      - "internal/**"
+      - "handler/**"
+      - "util/**"
+      - "go.mod"
+      - "go.sum"
     branches: [ "main" ]
   pull_request:
+    paths:
+      - "api/**"
+      - "cmd/**"
+      - "internal/**"
+      - "handler/**"
+      - "util/**"
+      - "go.mod"
+      - "go.sum"
     branches: [ "main" ]
 
 jobs:

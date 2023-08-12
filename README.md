@@ -189,6 +189,12 @@ spec:
 
 ### On existing cluster
 
+#### Helm Chart
+
+Find the helm chart in the following [directory](charts).
+
+#### Manual Setup
+
 To deploy the operator you will need the following manifests:
 
 *   serviceaccount

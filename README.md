@@ -198,6 +198,7 @@ To deploy the operator you will need the following manifests:
 *   schedule
 *   workloadschedule
 *   crds
+
     *   [schedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_schedules.yaml)
 
     *   [workloadschedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedules.yaml)
@@ -206,7 +207,8 @@ To deploy the operator you will need the following manifests:
 
     <!---->
 
-        kubectl apply -k config/crd/
+        kubectl apply -k config/crd/bases/workload-scheduler.bennsimon.github.io_schedules.yaml
+        kubectl apply -k config/crd/bases/workload-scheduler.bennsimon.github.io_workloadschedules.yaml
 
 Below is the snippet of the yaml files you would need to deploy the operator.  (for crds check command above)
 

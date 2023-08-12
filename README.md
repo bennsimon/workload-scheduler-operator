@@ -54,8 +54,93 @@ spec:
 ### WorkloadSchedule
 
 This is the resource where one specifies the workload(s) and schedule(s) with which action to perform on a particular schedule. It takes in selectors and schedules; currently the supported selectors are `namespace`, `name`, `kind` and `labels`. The schedules section is used to specify the list of schedules with the desired (replica count) value of that particular period.
+
+#### Selectors
+
+*   `namespaces`, takes in array of namespaces, when empty it defaults to `*` i.e. all namespaces.
+*   `kinds`, takes in `deployment` and/or `statefulset`, when empty defaults to both `deployment` and `statefulset`.
+*   `names`, takes in array of deployment or statefulset names, when empty it defaults to `*` i.e. all deployments and statefulsets.
+*   `labels`, takes in map of labels, when empty its defaults to null.
+
+For these selectors the more specific the selectors are the more they have a higher priority. .e.g. check the two below workloadschedules,
+the first example has more priority than the second therefore deployment will be evaluated once by the first workloadschedule and ignored when the second workloadschedule if being reconciled.
+
+    apiVersion: workload-scheduler.bennsimon.github.io/v1
+    kind: WorkloadSchedule
+    metadata:
+      labels:
+        app.kubernetes.io/name: workloadschedule
+        app.kubernetes.io/instance: workloadschedule-three-replica-scheduler
+        app.kubernetes.io/part-of: workload-scheduler-operator
+        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/created-by: workload-scheduler-operator
+      name: workloadschedule-three-replica-scheduler
+    spec:
+      selector:
+        namespaces:
+          - "ns1"
+        kinds:
+        names:
+          - "some-deploymnet"
+      schedules:
+        - schedule: "weekday"
+          desired: 3
+        - schedule: "downtime"
+          desired: 0
+
+<!---->
+
+    apiVersion: workload-scheduler.bennsimon.github.io/v1
+    kind: WorkloadSchedule
+    metadata:
+      labels:
+        app.kubernetes.io/name: workloadschedule
+        app.kubernetes.io/instance: workloadschedule-single-replica-scheduler
+        app.kubernetes.io/part-of: workload-scheduler-operator
+        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/created-by: workload-scheduler-operator
+      name: workloadschedule-single-replica-scheduler
+    spec:
+      selector:
+        namespaces:
+          - "ns1"
+        kinds:
+          - "deployment"
+        names:
+      schedules:
+        - schedule: "weekday"
+          desired: 1
+        - schedule: "downtime"
+          desired: 0
+
+For namespaces, kinds and names selectors, a set of all ordered triplets will be generated during evaluation. However, for labels the label map will be evaluated as is.
+e.g.
+
+    ...
+    spec:
+      selector:
+        namespaces:
+          - "ns1"
+          - "ns2"
+        kinds:
+          - "deployment"
+          - "statefulset"
+        names:
+          - "app1"
+    ...
+
+Triplets that will be generated from the above workload schedule
+
+| namespace | kind          | name   |
+|-----------|---------------|--------|
+| `ns1`     | `deployment`  | `app1` |
+| `ns2`     | `deployment`  | `app1` |
+| `ns1`     | `statefulset` | `app1` |
+| `ns2`     | `statefulset` | `app1` |
+
 The order of definition in the schedules section determines which schedule has more priority (FIFO).
-The more specific a workload schedule is, the higher priority it has i.e. it will override a more general selector.
+
+> The more specific a workload schedule is, the higher priority it has i.e. it will override a more general selector and will be evaluated once during a reconciliation.
 
 The custom resource takes the form below:
 
@@ -114,12 +199,14 @@ To deploy the operator you will need the following manifests:
 *   workloadschedule
 *   crds
     *   [schedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_schedules.yaml)
+
     *   [workloadschedules.yaml](config/crd/bases/workload-scheduler.bennsimon.github.io\_workloadschedules.yaml)
-    
-    * Use the command below at the root on this repository (i.e. after cloning) to deploy crds:
-    ````
-    kubectl apply -k config/crd/
-    ````
+
+    *   Use the command below at the root on this repository (i.e. after cloning) to deploy crds:
+
+    <!---->
+
+        kubectl apply -k config/crd/
 
 Below is the snippet of the yaml files you would need to deploy the operator.  (for crds check command above)
 

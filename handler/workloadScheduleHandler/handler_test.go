@@ -3,6 +3,7 @@ package workloadScheduleHandler
 import (
 	v1 "bennsimon.github.io/workload-scheduler-operator/api/v1"
 	"bennsimon.github.io/workload-scheduler-operator/handler/scheduleHandler"
+	"bennsimon.github.io/workload-scheduler-operator/util/config"
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/mock"
@@ -254,6 +255,50 @@ func TestWorkloadScheduleHandler_BuildSpecMap(t *testing.T) {
 			w.BuildSpecMap(tt.args._workloadSchedule, tt.args.specMap, tt.args.schedule)
 			if !reflect.DeepEqual(tt.args.specMap, tt.want) {
 				t.Errorf("BuildSpecMap() got = %v want %v", tt.args.specMap, tt.want)
+			}
+		})
+	}
+}
+
+type NopScheduleHandler struct {
+	scheduleHandler.IScheduleHandler
+}
+
+func (s *NopScheduleHandler) GetScheduleByName(_schedule string, r client.Reader, ctx context.Context) (*v1.Schedule, error) {
+	return nil, nil
+}
+
+func TestWorkloadScheduleHandler_ValidateWorkloadSchedule(t *testing.T) {
+	type fields struct {
+		ScheduleHandler scheduleHandler.IScheduleHandler
+		Config          config.Config
+	}
+	type args struct {
+		workloadSchedule *v1.WorkloadSchedule
+		r                client.Reader
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{name: "should return error if schedules is empty", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{}}}}, wantErr: true},
+		{name: "should return error if schedules is nil", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: nil}}}, wantErr: true},
+		{name: "should return error if schedule name is invalid", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{{Schedule: "week day"}}}}}, wantErr: true},
+		{name: "should return error if schedule name is invalid", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{{Schedule: "Weekday"}}}}}, wantErr: true},
+		{name: "should return error if schedule name is invalid", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{{Schedule: ".weekday"}}}}}, wantErr: true},
+		{name: "should return error if schedule name is invalid", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{{Schedule: ""}}}}}, wantErr: true},
+		{name: "should not return error if schedule name is valid", fields: fields{ScheduleHandler: &NopScheduleHandler{}}, args: args{workloadSchedule: &v1.WorkloadSchedule{Spec: v1.WorkloadScheduleSpec{Schedules: []v1.WorkloadScheduleUnit{{Schedule: "weekday"}}}}}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &WorkloadScheduleHandler{
+				ScheduleHandler: tt.fields.ScheduleHandler,
+				Config:          tt.fields.Config,
+			}
+			if err := w.ValidateWorkloadSchedule(tt.args.workloadSchedule, tt.args.r); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateWorkloadSchedule() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

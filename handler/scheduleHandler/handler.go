@@ -12,7 +12,7 @@ import (
 )
 
 type IScheduleHandler interface {
-	getScheduleByName(schedule string, r client.Reader, ctx context.Context) (*workloadschedulerv1.Schedule, error)
+	GetScheduleByName(schedule string, r client.Reader, ctx context.Context) (*workloadschedulerv1.Schedule, error)
 	FetchWorkloadSchedules(schedules []workloadschedulerv1.WorkloadScheduleUnit, r client.Reader, ctx context.Context) ([]workloadschedulerv1.Schedule, error)
 	IsThisDayIncluded(days []string, now time.Time) bool
 	ValidateSchedule(schedule *workloadschedulerv1.Schedule) error
@@ -74,7 +74,7 @@ func (s *ScheduleHandler) IsThisDayIncluded(days []string, now time.Time) bool {
 func (s *ScheduleHandler) FetchWorkloadSchedules(_schedules []workloadschedulerv1.WorkloadScheduleUnit, r client.Reader, ctx context.Context) ([]workloadschedulerv1.Schedule, error) {
 	var schedules []workloadschedulerv1.Schedule
 	for _, _schedule := range _schedules {
-		schedule, err := s.IScheduleHandler.getScheduleByName(_schedule.Schedule, r, ctx)
+		schedule, err := s.IScheduleHandler.GetScheduleByName(_schedule.Schedule, r, ctx)
 		if err != nil {
 			return nil, fmt.Errorf(fmt.Sprintf("error when fetching: %v schedule", _schedule), err)
 		} else {
@@ -84,7 +84,7 @@ func (s *ScheduleHandler) FetchWorkloadSchedules(_schedules []workloadschedulerv
 	return schedules, nil
 }
 
-func (s *ScheduleHandler) getScheduleByName(_schedule string, r client.Reader, ctx context.Context) (*workloadschedulerv1.Schedule, error) {
+func (s *ScheduleHandler) GetScheduleByName(_schedule string, r client.Reader, ctx context.Context) (*workloadschedulerv1.Schedule, error) {
 	schedule := &workloadschedulerv1.Schedule{}
 	err := r.Get(ctx, client.ObjectKey{Name: _schedule}, schedule)
 	if err != nil {

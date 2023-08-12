@@ -2,8 +2,10 @@ package scheduleHandler
 
 import (
 	workloadschedulerv1 "bennsimon.github.io/workload-scheduler-operator/api/v1"
+	"bennsimon.github.io/workload-scheduler-operator/util"
 	"context"
 	"fmt"
+	"k8s.io/utils/strings/slices"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"time"
@@ -27,6 +29,34 @@ func New() *ScheduleHandler {
 func (s *ScheduleHandler) ValidateSchedule(schedule *workloadschedulerv1.Schedule) error {
 	if schedule.Spec.ScheduleUnits == nil || len(schedule.Spec.ScheduleUnits) == 0 {
 		return fmt.Errorf("schedule(s) need to be defined")
+	} else {
+		now := time.Now().In(time.Local)
+		days := []string{"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
+
+		for _, scheduleUnit := range schedule.Spec.ScheduleUnits {
+			if scheduleUnit.Days != nil && len(scheduleUnit.Days) > 0 {
+				for _, day := range scheduleUnit.Days {
+					if !slices.Contains(days, strings.ToLower(day)) {
+						return fmt.Errorf("day: %s, is not valid", day)
+					}
+				}
+			}
+			startTime, err := util.ProcessScheduleTimeUnit(scheduleUnit.Start, now)
+			if err != nil {
+				return err
+			}
+			endTime, err := util.ProcessScheduleTimeUnit(scheduleUnit.End, now)
+			if err != nil {
+				return err
+			}
+
+			if startTime.After(endTime) {
+				return fmt.Errorf("invalid timeunit, %s; startTime: %s, endTime: %s", "endTime is before startTime", startTime, endTime)
+			}
+			if startTime.Equal(endTime) {
+				return fmt.Errorf("invalid timeunit, %s; startTime: %s, endTime: %s", "endTime == startTime", startTime, endTime)
+			}
+		}
 	}
 	return nil
 }

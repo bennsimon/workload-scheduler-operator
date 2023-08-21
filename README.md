@@ -4,6 +4,8 @@
 
 This operator scales various kubernetes workloads to a desired number of replicas based on a schedule.
 
+> For cost saving, consider using a cluster autoscaler i.e. when workloads reduce based on a workload schedule, the cluster autoscaler can reduce number of nodes needed to support your cluster. 
+
 ## Description
 
 The operator introduces 2 custom resources to handle its logic:

@@ -46,7 +46,7 @@ func (r *WorkloadScheduleReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	err = r.IWorkloadScheduleHandler.ValidateWorkloadSchedule(workloadSchedule)
+	err = r.IWorkloadScheduleHandler.ValidateWorkloadSchedule(workloadSchedule, r)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

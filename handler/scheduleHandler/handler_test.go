@@ -84,13 +84,13 @@ func TestScheduleHandler_getSchedulesByName(t *testing.T) {
 			s := &ScheduleHandler{}
 			tt.setupMocks()
 			defer tt.verifyMocks()
-			got, err := s.getScheduleByName(tt.args.schedule, testreader, tt.args.ctx)
+			got, err := s.GetScheduleByName(tt.args.schedule, testreader, tt.args.ctx)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getScheduleByName() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetScheduleByName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getScheduleByName() got = %v, want %v", got, tt.want)
+				t.Errorf("GetScheduleByName() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -101,7 +101,7 @@ type testScheduleHandler struct {
 	IScheduleHandler
 }
 
-func (s *testScheduleHandler) getScheduleByName(schedule string, r client.Reader, ctx context.Context) (*v1.Schedule, error) {
+func (s *testScheduleHandler) GetScheduleByName(schedule string, r client.Reader, ctx context.Context) (*v1.Schedule, error) {
 	args := s.Called(schedule, r, ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -128,7 +128,7 @@ func TestScheduleHandler_CheckIfSchedulesExist(t *testing.T) {
 	}{
 		{name: "should return nil schedules when error occurs when getting schedule.", setupMocks: func() {
 			testschedulehandler = &testScheduleHandler{}
-			testschedulehandler.On("getScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(nil, fmt.Errorf("some error"))
+			testschedulehandler.On("GetScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(nil, fmt.Errorf("some error"))
 			s.IScheduleHandler = testschedulehandler
 		}, verifyMocks: func() {
 			testschedulehandler.AssertExpectations(t)
@@ -141,7 +141,7 @@ func TestScheduleHandler_CheckIfSchedulesExist(t *testing.T) {
 			want: nil, wantErr: true},
 		{name: "should return schedules when schedule retrieved successfully.", setupMocks: func() {
 			testschedulehandler = &testScheduleHandler{}
-			testschedulehandler.On("getScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(&v1.Schedule{}, nil)
+			testschedulehandler.On("GetScheduleByName", mock.IsType("weekday"), mock.IsType(&testReader{}), mock.IsType(context.TODO())).Return(&v1.Schedule{}, nil)
 			s.IScheduleHandler = testschedulehandler
 		}, verifyMocks: func() {
 			testschedulehandler.AssertExpectations(t)

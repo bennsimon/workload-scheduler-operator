@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/alistanis/cartesian"
 	apps "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sort"
@@ -28,8 +29,9 @@ type WorkloadHandler interface {
 type IWorkloadScheduleHandler interface {
 	EvaluateWorkloadSchedulers(schedulers *workloadschedulerv1.WorkloadScheduleList, r client.Reader, ctx context.Context) (map[string][]workloadschedulerv1.Schedule, map[string]workloadschedulerv1.WorkloadSchedule)
 	ProcessWorkloadSchedules(schedules map[string][]workloadschedulerv1.Schedule, schedulerMap map[string]workloadschedulerv1.WorkloadSchedule, c client.Client, ctx context.Context) error
-	ValidateWorkloadSchedule(schedule *workloadschedulerv1.WorkloadSchedule) error
+	ValidateWorkloadSchedule(schedule *workloadschedulerv1.WorkloadSchedule, r client.Reader) error
 }
+
 type DeploymentHandler struct {
 	config.Config
 	apps.Deployment
@@ -52,9 +54,21 @@ func New() *WorkloadScheduleHandler {
 	return &WorkloadScheduleHandler{ScheduleHandler: scheduleHandler.New(), Config: *config.New()}
 }
 
-func (w *WorkloadScheduleHandler) ValidateWorkloadSchedule(workloadSchedule *workloadschedulerv1.WorkloadSchedule) error {
+func (w *WorkloadScheduleHandler) ValidateWorkloadSchedule(workloadSchedule *workloadschedulerv1.WorkloadSchedule, r client.Reader) error {
 	if workloadSchedule.Spec.Schedules == nil || len(workloadSchedule.Spec.Schedules) == 0 {
 		return fmt.Errorf("schedules need to be defined")
+
+	} else {
+		for _, schedule := range workloadSchedule.Spec.Schedules {
+			if errs := validation.IsDNS1123Label(schedule.Schedule); errs != nil {
+				return fmt.Errorf("schedule: %s is not valid. %v", schedule.Schedule, errs)
+			}
+
+			_, err := w.ScheduleHandler.GetScheduleByName(schedule.Schedule, r, context.Background())
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

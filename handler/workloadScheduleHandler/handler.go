@@ -7,7 +7,6 @@ import (
 	"bennsimon.github.io/workload-scheduler-operator/util/config"
 	"context"
 	"fmt"
-	"github.com/alistanis/cartesian"
 	apps "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -111,9 +110,10 @@ func (w *WorkloadScheduleHandler) BuildSpecMap(_workloadSchedule workloadschedul
 		namespaces = []string{util.ALL}
 	}
 
-	if len(kinds) != 0 {
-		keysArr[1] = '1'
-	} else {
+	//set to 1, when kind is not specified it defaults to include both deployment & statefulset which are valid workloads.
+	keysArr[1] = '1'
+
+	if len(kinds) == 0 {
 		kinds = []string{util.DEPLOYMENT, util.STATEFULSET}
 	}
 
@@ -129,7 +129,15 @@ func (w *WorkloadScheduleHandler) BuildSpecMap(_workloadSchedule workloadschedul
 
 	keyStr := string(keysArr)
 	//
-	var extractedKeys = cartesian.Product(namespaces, kinds, names)
+	var extractedKeys [][]string
+
+	for _, namespace := range namespaces {
+		for _, kind := range kinds {
+			for _, name := range names {
+				extractedKeys = append(extractedKeys, []string{namespace, kind, name})
+			}
+		}
+	}
 
 	for _, _keyComb := range extractedKeys {
 		keyComb := strings.Join(_keyComb, config.MapKeySeparator)
@@ -366,6 +374,9 @@ func (w *WorkloadScheduleHandler) executeActionOnStatefulSet(r client.Client, ct
 	if err != nil {
 		log.Log.Error(err, fmt.Sprintf("error occurred when fetching %s", util.STATEFULSET))
 	} else {
+		if len(statefulSetWorkloads.Items) == 0 && w.Config.LookUpBooleanEnv(config.Debug) {
+			log.Log.Info(fmt.Sprintf("%s: %s not found. NS: %s, WS: %s", util.STATEFULSET, _workloadSchedule.Name, _workloadSchedule.Namespace, _workloadSchedule.WorkloadScheduler))
+		}
 		for _, statefulSet := range statefulSetWorkloads.Items {
 			w.AdjustReplicas(_workloadSchedule, r, ctx, processedWorkloads, NewStatefulSetHandler(&statefulSet))
 		}
@@ -378,6 +389,9 @@ func (w *WorkloadScheduleHandler) executeActionOnDeployment(r client.Client, ctx
 	if err != nil {
 		log.Log.Error(err, fmt.Sprintf("error occurred when fetching %s", util.DEPLOYMENT))
 	} else {
+		if len(deploymentWorkloads.Items) == 0 && w.Config.LookUpBooleanEnv(config.Debug) {
+			log.Log.Info(fmt.Sprintf("%s: %s not found. NS: %s, WS: %s", util.DEPLOYMENT, _workloadSchedule.Name, _workloadSchedule.Namespace, _workloadSchedule.WorkloadScheduler))
+		}
 		for _, deployment := range deploymentWorkloads.Items {
 			w.AdjustReplicas(_workloadSchedule, r, ctx, processedWorkloads, NewDeploymentHandler(&deployment))
 		}

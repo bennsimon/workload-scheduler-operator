@@ -205,7 +205,7 @@ func TestWorkloadScheduleHandler_BuildSpecMap(t *testing.T) {
 			},
 			schedule: v1.Schedule{ObjectMeta: metav1.ObjectMeta{Name: "test-schedule"}},
 		}, want: map[string]map[string][]v1.WorkloadScheduleData{
-			"0010": {
+			"0110": {
 				"*/deployment/test-deploy":  []v1.WorkloadScheduleData{{Name: "test-deploy", Namespace: "*", Kind: "deployment", Desired: 0, WorkloadScheduler: "test-workload-scheduler"}},
 				"*/statefulset/test-deploy": []v1.WorkloadScheduleData{{Name: "test-deploy", Namespace: "*", Kind: "statefulset", Desired: 0, WorkloadScheduler: "test-workload-scheduler"}},
 			},
@@ -224,7 +224,7 @@ func TestWorkloadScheduleHandler_BuildSpecMap(t *testing.T) {
 			},
 			schedule: v1.Schedule{ObjectMeta: metav1.ObjectMeta{Name: "test-schedule"}},
 		}, want: map[string]map[string][]v1.WorkloadScheduleData{
-			"0000": {
+			"0100": {
 				"*/deployment/*":  []v1.WorkloadScheduleData{{Name: "*", Namespace: "*", Kind: "deployment", Desired: 0, WorkloadScheduler: "test-workload-scheduler"}},
 				"*/statefulset/*": []v1.WorkloadScheduleData{{Name: "*", Namespace: "*", Kind: "statefulset", Desired: 0, WorkloadScheduler: "test-workload-scheduler"}},
 			},
